@@ -26,9 +26,9 @@ that contain this IAT structure.
 ### Hooking 
 
 - Making a function that locate the IAT of user32.dll [done]
-- Find the address of the function to hook
-- Replace the address
-- Write a hook function (for example a reverse shell)
+- Find the address of the function to hook [done]
+- Replace the address [done]
+- Write a hook function [done]
 - Optional : restoration of the old function address
 
 ### Hiding 
