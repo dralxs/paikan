@@ -1,6 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <Windows.h>
+#include "paikan.h"
 
 // PIMAGE_IMPORT_DESCRIPTOR is a pointer to a IMAGE_IMPORT_DESCRIPTOR
 // This structure describes the data directories used in PE file format
