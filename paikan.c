@@ -1,29 +1,39 @@
 #include "paikan.h"
 
-PIMAGE_IMPORT_DESCRIPTOR getFunctionAddress(HMODULE hModule, const char* functionName){
+typedef BOOL (WINAPI *PrototypeShowWindow)(HWND hWnd, int nCmdShow);
+PrototypeShowWindow originalShowWindow = &ShowWindow;
+
+BOOL ShowWindowHook(HWND hWnd, int nCmdShow){
+    printf("exploit");
+    return originalShowWindow(hWnd, nCmdShow);
+}
+
+// Replace the function address with the hook
+void ReplaceFunctionAddress(HMODULE hModule, const char* functionName){
     PIMAGE_IMPORT_DESCRIPTOR pIAT = LocateIAT(hModule);
     if(!pIAT){
-        return NULL;
+        printf("error");
     }
     // The loop continue as long as there is a valid dll name
     while(pIAT->Name){
-        char* dllName = (char*)((BYTE*)hModule + pIAT->Name);
         // Get the structure THUNK which contain information about the function
         PIMAGE_THUNK_DATA thunk = (PIMAGE_THUNK_DATA)((BYTE*)hModule + pIAT->OriginalFirstThunk);
         PIMAGE_THUNK_DATA funcThunk = (PIMAGE_THUNK_DATA)((BYTE*)hModule + pIAT->FirstThunk);
         // The loop continue as lonn as there is a valid address of the function 
         while(thunk->u1.AddressOfData){
             PIMAGE_IMPORT_BY_NAME pName = (PIMAGE_IMPORT_BY_NAME)((BYTE*)hModule + thunk->u1.AddressOfData);
-            if(strcmp(pName->Name, functionName) == 0)
-                return (FARPROC)funcThunk->u1.Function;
+            if(strcmp(pName->Name, functionName) == 0){
+                DWORD oldProtect = 0;
+                VirtualProtect((LPVOID)(&funcThunk->u1.Function), 8, PAGE_READWRITE, &oldProtect);
+                funcThunk->u1.Function = (DWORD_PTR)ShowWindowHook;
+            }
             thunk++;
-            funcThunk;
+            funcThunk++;
             printf("%s\n", pName->Name);
         }
         pIAT++;
         printf("%lu\n", thunk->u1.Function);
     }
-    return NULL;
 }
 
 // PIMAGE_IMPORT_DESCRIPTOR is a pointer to a IMAGE_IMPORT_DESCRIPTOR
@@ -52,11 +62,13 @@ PIMAGE_IMPORT_DESCRIPTOR LocateIAT(HMODULE hModule){
 }
 
 int main(){
-
     HMODULE hModule = LoadLibrary(TEXT("user32.dll"));
     PIMAGE_IMPORT_DESCRIPTOR pIAT = LocateIAT(hModule);
-    PIMAGE_IMPORT_DESCRIPTOR pFunction = getFunctionAddress(hModule, "FormatMessageW");
-    printf("Address of the function : %p\n", pFunction);
+    GetFunctionAddress(hModule, "NtUserShowWindow");
+    // Fake window
+    HWND hwnd = GetConsoleWindow();
+    // Testing the hook 
+    ShowWindow(hwnd, SW_HIDE);
     FreeLibrary(hModule);
     if(pIAT){
         printf("IAT located at: %p\n", pIAT);
