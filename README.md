@@ -3,7 +3,7 @@
 ## Introduction 
 
 The malware I am currently trying to make is a rootkit that works on windows system. It is called **Paikan** in reference to the book "La nuit des temps" by René Barjavel.
-It is a school project and I am not responsible for any bad use of this program. 
+This is a school project. I am not responsible for any misuse of this program. 
 
 ### Hooking 
 
