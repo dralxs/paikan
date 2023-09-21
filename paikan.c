@@ -19,7 +19,7 @@ void ReplaceFunctionAddress(HMODULE hModule, const char* functionName){
         // Get the structure THUNK which contain information about the function
         PIMAGE_THUNK_DATA thunk = (PIMAGE_THUNK_DATA)((BYTE*)hModule + pIAT->OriginalFirstThunk);
         PIMAGE_THUNK_DATA funcThunk = (PIMAGE_THUNK_DATA)((BYTE*)hModule + pIAT->FirstThunk);
-        // The loop continue as lonn as there is a valid address of the function 
+        // The loop continue as long as there is a valid address of the function 
         while(thunk->u1.AddressOfData){
             PIMAGE_IMPORT_BY_NAME pName = (PIMAGE_IMPORT_BY_NAME)((BYTE*)hModule + thunk->u1.AddressOfData);
             if(strcmp(pName->Name, functionName) == 0){
